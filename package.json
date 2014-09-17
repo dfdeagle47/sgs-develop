@@ -1,0 +1,42 @@
+{
+	"name": "sgs-develop",
+	"private": true,
+	"version": "0.0.1",
+	"description": "Sagacify's develop module.",
+	"main": "src/index.js",
+	"scripts": {
+		"test": "grunt ci --verbose"
+	},
+	"dependencies": {
+		"mongoose": "^3.0.0",
+		"async": "^0.2.5",
+		"underscore": "1.7.0",
+		"underscore.string": "2.3.3"
+	},
+	"devDependencies": {
+		"express": "^4.8.8",
+		"body-parser": "^1.8.1",
+		"mocha": "^1.21.4",
+		"grunt-cli": "^0.1.13",
+		"load-grunt-tasks": "^0.6.0",
+		"grunt-contrib-jshint": "^0.10.0",
+		"grunt-contrib-clean": "^0.6.0",
+		"grunt-mocha-test": "^0.11.0",
+		"grunt-istanbul": "^0.2.4",
+		"grunt-jsonlint": "^1.0.4",
+		"grunt-jscs": "^0.6.1",
+		"supertest": "0.13.0"
+	},
+	"peerDependencies": {
+		"grunt": "^0.4.5"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Sagacify/sgs-develop"
+	},
+	"author": "François Beuvens (https://github.com/fbeuvens)",
+	"bugs": {
+		"url": "https://github.com/Sagacify/sgs-develop/issues"
+	},
+	"homepage": "https://github.com/Sagacify/sgs-develop"
+}
