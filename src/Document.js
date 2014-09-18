@@ -9,22 +9,27 @@ module.exports = function(mongoose){
 	mongoose.Document.prototype.develop = function(options, callback){
 		var developedObject = {};
 		var me = this;
+		// console.log('develop', options)
 		this.pathsToDevelop(options, function(err, pathsToDevelop){
 			if(err){
 				return callback(err);
 			}
+			// console.log('pathsToDevelop', pathsToDevelop)
 			me.developPopulate(pathsToDevelop, options, function(err){
 				if(err){
 					return callback(err);
 				}
+				// console.log('developPopulate')
 				me.fillValuesInDevelopedObject(developedObject, pathsToDevelop, options, function(err){
 					if(err){
 						return callback(err);
 					}
+					// console.log('fillValuesInDevelopedObject', developedObject)
 					me.developChildrenInDevelopedObject(developedObject, pathsToDevelop, options, function(err){
 						if(err){
 							return callback(err);
 						}
+						// console.log('developChildrenInDevelopedObject', developedObject)
 						callback(null, developedObject);
 					});
 				});
@@ -33,7 +38,34 @@ module.exports = function(mongoose){
 	};
 
 	mongoose.Document.prototype.pathsToDevelop = function(options, callback){
-		this.schema.pathsToDevelop(options, callback);
+		this.developSchema(options, function(err, developSchema){
+			if(err){
+				return callback(err);
+			}
+
+			//console.log('developSchema', developSchema)
+
+			var devPathsByPathFromScope = function(scope, callback){
+				var scopeSchema = developSchema[scope]||{};
+				var devPaths = {};
+				(scopeSchema.extend||[]).forEach(function(scopeToExtend){
+					devPaths = _(devPaths).extend(devPathsByPathFromScope(scopeToExtend));
+				});
+				(scopeSchema.paths||[]).forEach(function(path){
+					if(typeof path === 'string'){
+						path = {path: path};
+					}
+					devPaths[path.path] = path;
+				});
+				return devPaths;
+			}
+
+			callback(null, _(devPathsByPathFromScope(options.scope)).values());
+		});
+	};
+
+	mongoose.Document.prototype.developSchema = function(options, callback){
+		callback(null, {});
 	};
 
 	mongoose.Document.prototype.developPopulate = function(pathsToDevelop, options, callback){
@@ -42,31 +74,34 @@ module.exports = function(mongoose){
 		}).map(function(path){
 			return path.path;
 		});
-		me.populate(pathsToPopulate.join(' '), callback);
+		this.populate(pathsToPopulate.join(' '), callback);
 	};
 
 	mongoose.Document.prototype.fillValuesInDevelopedObject = function(developedObject, pathsToDevelop, options, callback){
+		var me = this;
 		async.each(pathsToDevelop, function(pathToDevelop, callback){
 			var path = pathToDevelop.path;
 			var camelizedGetPath = _('get_'+path).camelize();
 			if(typeof me[camelizedGetPath] === 'function'){
 				me[camelizedGetPath](options, function(err, value){
 					developedObject[path] = value;
+					callback();
 				});
 			}
 			else{
-				developedObject[path] = value;
+				developedObject[path] = me.get(path);
 				callback();
 			}
-		}), callback);
+		}, callback);
 	};
 
 	mongoose.Document.prototype.developChildrenInDevelopedObject = function(developedObject, pathsToDevelop, options, callback){
+		var me = this;
 		async.each(pathsToDevelop, function (pathToDevelop, callback) {
 			var path = pathToDevelop.path;
-			var value = me[name];
+			var value = developedObject[path];
 			if(value && typeof value.develop === 'function'){
-				value.develop({req: req, scope: pathToDevelop.scope}, function(err, developedValue){
+				value.develop({req: options.req, scope: pathToDevelop.scope}, function(err, developedValue){
 					if(err){
 						return callback(err);
 					}

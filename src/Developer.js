@@ -9,16 +9,16 @@ var Developer = function (options) {
 	});
 };
 
-Router.prototype.develop = function (options) {
+Developer.prototype.develop = function (options) {
 	options = _.defaults(options||{}, {
-
+		
 	});
 	var me = this;
 	return function(req, res, next){
 		var data = res.data;
 		if(typeof res.data.develop === 'function'){
 			var scope = options.scope||req.data.scope||me.options.defaultScope;
-			res.data.develop({req: req, scope: scope}, function(err, developedData){
+			res.data.develop({req: req, scope: scope, context: 'develop'}, function(err, developedData){
 				if(err){
 					return next(err);
 				}

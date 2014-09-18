@@ -5,7 +5,7 @@ module.exports = function(mongoose){
 
 	Array.prototype.develop = function(options, callback){
 		if (!this.length) {
-			return callback();
+			return callback(null, this);
 		};
 
 		var doc = this[0];
@@ -14,7 +14,7 @@ module.exports = function(mongoose){
 		} 
 		else {
 			var me = this;
-			doc.constructor.pathsToDevelop(options, function(err, pathsToDevelop){
+			doc.pathsToDevelop(options, function(err, pathsToDevelop){
 				if(err){
 					return callback(err);
 				}
@@ -43,8 +43,8 @@ module.exports = function(mongoose){
 	Array.prototype.developDocs = function(options, callback){
 		var developedArray = [];
 		var me = this;
-		async.each(_(this).keys(), function(index, callback){
-			me[index].develop(function(err, devObj){
+		async.times(this.length, function(index, callback){
+			me[index].develop(options, function(err, devObj){
 				if(!err){
 					developedArray[index] = devObj;
 				}
@@ -54,6 +54,9 @@ module.exports = function(mongoose){
 			if(err){
 				callback(err);
 			}
+
+				//console.log(developedArray, developedArray[0] instanceof mongoose.Document)
+
 			callback(null, developedArray);
 		});
 	};

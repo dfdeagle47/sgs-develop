@@ -4,8 +4,27 @@ var EmbeddedTestSchema = new mongoose.Schema({
 	}
 });
 
-EmbeddedTestSchema.statics.getVirtualCollAttr = function(options, callback){
-	mongoose.model('Test').findOne({}, callback);
+EmbeddedTestSchema.methods.getVirtualAttr = function(options, callback){
+	callback(null, 'ok');
+};
+
+EmbeddedTestSchema.methods.developSchema = function(options, callback){
+	var ds = {
+		light: {
+			paths: [
+				'embeddedAttr'
+			]
+		},
+
+		detailed: {
+			paths: [
+				'embeddedAttr',
+				'virtualAttr'
+			]
+		}
+	};
+
+	callback(null, ds);
 };
 
 EmbeddedTestSchema.methods.getVirtualInstanceAttr = function(options, callback){
@@ -13,26 +32,53 @@ EmbeddedTestSchema.methods.getVirtualInstanceAttr = function(options, callback){
 };
 
 var TestSchema = new mongoose.Schema({
-	attr: {
+	attr1: {
 		type: String
 	},
-	embeddedTests: [EmbeddedTestSchema],
-	linkedTest: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'Test'
-	}
+	attr2: {
+		attr3: {
+			type: String
+		}
+	},
+	embeddedTests: [EmbeddedTestSchema]
 });
-
-TestSchema.statics.getVirtualCollAttr = function(options, callback){
-	mongoose.model('Test').findOne({}, callback);
-};
 
 TestSchema.methods.getVirtualInstanceAttr = function(options, callback){
 	mongoose.model('Test').findOne({}, callback);
 };
 
-TestSchema.methods.doThat = function(options, callback){
-	callback(null, options.data);
+TestSchema.methods.getVirtualStringAttr = function(options, callback){
+	callback(null, 'ok');
+};
+
+TestSchema.methods.developSchema = function(options, callback){
+	var ds = {
+		light: {
+			paths: [
+				'attr1',
+				'attr2.attr3'
+			]
+		},
+
+		detailed: {
+			extend: ['light'],
+			paths: [
+				{path: 'embeddedTests', scope: 'light'},
+				{path: 'virtualInstanceAttr', scope: 'light'},
+				'virtualStringAttr'
+			]
+		},
+
+		detailed_embdet: {
+			extend: ['detailed'],
+			paths: [
+				{path: 'embeddedTests', scope: 'detailed'}
+			]
+		}
+
+	};
+
+	callback(null, ds);
 };
 
 var TestModel = mongoose.model('Test', TestSchema);

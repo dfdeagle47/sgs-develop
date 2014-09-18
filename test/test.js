@@ -1,29 +1,28 @@
 var assert = require('assert');
-var express = require('express');
 global.mongoose = require('mongoose');
-var supertest = require('supertest');
 var _ = require('underscore');
-var bodyParser = require('body-parser');
+var async = require('async');
 
 require('./TestModel');
+require('./UserModel');
 
-//var Developer = require('./coverage/instrument/src/index')(mongoose);
-var Developer = require('../src/index')(mongoose);
+var Developer = require('./coverage/instrument/src/index')(mongoose);
+//var Developer = require('../src/index')(mongoose);
 
 var developer = new Developer({});
-var develop = router.developer.bind(developer);
+var develop = developer.develop.bind(developer);
 
-var test = mongoose.model('Test')({embeddedTests: [{}]});
 
-debugger
+// var test = mongoose.model('Test')({
+// 	attr1: 'attr1',
+// 	attr2: {
+// 		attr3: 'attr3'
+// 	},
+// 	embeddedTests: [{
+// 		embeddedAttr: 'embeddedAttr'
+// 	}]
+// });
 
-var createData = function(req, res, next){
-	req.data = {};
-	_(req.data).extend(req.body);
-	_(req.data).extend({paginate: {}});
-
-	next();
-};
 
 describe('Testing the mongoose develop module.', function () {
 	'use strict';
@@ -37,21 +36,140 @@ describe('Testing the mongoose develop module.', function () {
 		});
 	});
 
-	it('POST /api/<collection>', function(done){
-		app.post('/api/tests', createData, route, function(req, res){
-			assert(res.data instanceof mongoose.Document);
-			assert.equal(res.data.attr, req.data.attr);
-			testId = res.data.id;
-			mongoose.model('Test').count({}, function(err, count){
+	before(function (done) {
+		async.times(10, function(n, next){
+			mongoose.model('Test').create({
+				attr1: 'attr1',
+				attr2: {
+					attr3: 'attr3'
+				},
+				embeddedTests: [{
+					embeddedAttr: 'embeddedAttr'
+				}]
+			}, next);
+		}, done);
+	});
+
+	before(function (done) {
+		mongoose.model('Test').findOne(function(err, test){
+			if(err){
+				return done(err);
+			}
+			mongoose.model('User').create({
+				attr: 'userattr',
+				test: test._id
+			}, done);
+		});
+	});
+
+	var assertTestLight = function(doc){
+		assert(!(doc instanceof mongoose.Document));
+		var keys = _(doc).keys();
+		assert.equal(keys.length, 2);
+		assert(_(keys).contains('attr1'));
+		assert(_(keys).contains('attr2.attr3'));
+	};
+
+	var assertTestDetailed = function(doc){
+		assert(!(doc instanceof mongoose.Document));
+		var keys = _(doc).keys();
+		assert.equal(keys.length, 5);
+		assert(_(keys).contains('attr1'));
+		assert(_(keys).contains('attr2.attr3'));
+		assert(_(keys).contains('embeddedTests'));
+		assert(_(keys).contains('virtualInstanceAttr'));
+		assert(_(keys).contains('virtualStringAttr'));
+		assertTestLight(doc.virtualInstanceAttr);
+	};
+
+	var assertUserDetailed_TestDetailed = function(doc){
+		assert(!(doc instanceof mongoose.Document));
+		var keys = _(doc).keys();
+		assert(_(keys).contains('attr'));
+		assert(_(keys).contains('test'));
+		assert.equal(keys.length, 2);
+		assertTestDetailed(doc.test);
+	};
+
+	var assertEmbeddedTestDetailed = function(doc){
+		assert(!(doc instanceof mongoose.Document));
+		var keys = _(doc).keys();
+		assert.equal(keys.length, 2);
+		assert(_(keys).contains('embeddedAttr'));
+		assert(_(keys).contains('virtualAttr'));
+	};
+
+	it('single document light', function(done){
+		mongoose.model('Test').findOne({}, function(err, test){
+			var res = {data: test};
+			develop({scope: 'light'})({}, res, function(err){
 				if(err){
-					done(err);
+					return done(err);
 				}
-				assert.equal(count, 1);
+				assertTestLight(res.data);
 				done();
 			});
 		});
+	});
 
-		st.post('/api/tests').send({hey: 'test'}).end();
+	it('single document detailed', function(done){
+		mongoose.model('Test').findOne({}, function(err, test){
+			var res = {data: test};
+			develop({scope: 'detailed'})({}, res, function(err){
+				if(err){
+					return done(err);
+				}
+				assertTestDetailed(res.data);
+				done();
+			});
+		});
+	});
+
+	it('single document detailed child detailed', function(done){
+		mongoose.model('User').findOne({}, function(err, user){
+			var res = {data: user};
+			develop({scope: 'detailed_testdetailed'})({}, res, function(err){
+				if(err){
+					return done(err);
+				}
+				assertUserDetailed_TestDetailed(res.data);
+				done();
+			});
+		});
+	});
+
+	it('documentArray detailed', function(done){
+		mongoose.model('Test').findOne({}, function(err, test){
+			if(err){
+				return done(err);
+			}
+			test.embeddedTests.push({embeddedAttr: 'embeddedAttr2'});
+			var res = {data: test.embeddedTests};
+			develop({scope: 'detailed'})({}, res, function(err){
+				if(err){
+					return done(err);
+				}
+				assert(res.data instanceof Array);
+				res.data.forEach(function(doc){
+					assertEmbeddedTestDetailed(doc);
+				});
+				done();
+			});
+		});
+	});
+
+	it('single document client format', function(done){
+		mongoose.model('Test').findOne({}, function(err, test){
+			var req = {data: {scope: 'light'}};
+			var res = {data: test};
+			develop({})(req, res, function(err){
+				if(err){
+					return done(err);
+				}
+				assertTestLight(res.data);
+				done();
+			});
+		});
 	});
 		
 
