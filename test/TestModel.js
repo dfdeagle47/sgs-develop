@@ -64,7 +64,7 @@ TestSchema.methods.developSchema = function(options, callback){
 			extend: ['light'],
 			paths: [
 				{path: 'embeddedTests', scope: 'light'},
-				{path: 'virtualInstanceAttr', scope: 'light'},
+				{path: 'virtualInstanceAttr', scope: 'light', populate: true},
 				'virtualStringAttr'
 			]
 		},

@@ -10,14 +10,14 @@ var Developer = function (options) {
 };
 
 Developer.prototype.develop = function (options) {
-	options = _.defaults(options||{}, {
-		
-	});
+	options = _.extend(options||{}, this.options);
+
 	var me = this;
+
 	return function(req, res, next){
 		var data = res.data;
 		if(typeof res.data.develop === 'function'){
-			var scope = options.scope||req.data.scope||me.options.defaultScope;
+			var scope = options.scope||req.data.scope||options.defaultScope;
 			res.data.develop({req: req, scope: scope, context: 'develop'}, function(err, developedData){
 				if(err){
 					return next(err);
