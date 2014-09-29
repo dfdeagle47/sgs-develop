@@ -11,8 +11,7 @@
 		"mongoose": "^3.0.0",
 		"async": "^0.2.5",
 		"underscore": "1.7.0",
-		"underscore.string": "2.3.3",
-		"sgs-mongoose-additions": "git@github.com:Sagacify/sgs-mongoose-additions.git"
+		"underscore.string": "2.3.3"
 	},
 	"devDependencies": {
 		"express": "^4.8.8",
@@ -26,7 +25,8 @@
 		"grunt-istanbul": "^0.2.4",
 		"grunt-jsonlint": "^1.0.4",
 		"grunt-jscs": "^0.6.1",
-		"supertest": "0.13.0"
+		"supertest": "0.13.0",
+		"sgs-mongoose-additions": "git@github.com:Sagacify/sgs-mongoose-additions.git"
 	},
 	"peerDependencies": {
 		"grunt": "^0.4.5"
