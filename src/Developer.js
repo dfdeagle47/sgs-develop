@@ -9,28 +9,32 @@ var Developer = function (options) {
 	});
 };
 
-Developer.prototype.develop = function (options) {
-	options = _.extend(options||{}, this.options);
+_(Developer.prototype).extend({
 
-	var me = this;
+	develop: function (options) {
+		options = _.extend(options||{}, this.options);
 
-	return function(req, res, next){
-		var data = res.data;
-		if(typeof res.data.develop === 'function'){
-			var scope = options.scope||req.data.scope||options.defaultScope;
-			res.data.develop({req: req, scope: scope, context: 'develop'}, function(err, developedData){
-				if(err){
-					return next(err);
-				}
-				res.data = developedData;
+		var me = this;
+
+		return function(req, res, next){
+			var data = res.data;
+			if(typeof res.data.develop === 'function'){
+				var scope = options.scope||req.data.scope||options.defaultScope;
+				res.data.develop({req: req, scope: scope, context: 'develop'}, function(err, developedData){
+					if(err){
+						return next(err);
+					}
+					res.data = developedData;
+					next();
+				});
+			}
+			else{
 				next();
-			});
-		}
-		else{
-			next();
+			}
 		}
 	}
-};
+
+});
 
 module.exports = Developer;
 

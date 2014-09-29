@@ -2,21 +2,30 @@ var _ = require('underscore');
 
 module.exports = function(mongoose){
 
-	mongoose.Types.Embedded.prototype.populate = function(paths, callback){
-		var parentPath = this.parentArray()._path;
-		var me = this;
-		paths = paths.split(' ').filter(function(path){
-			return !me.populated(path);
-		}).map(function(path){
-			return parentPath+'.'+path;
-		}).join(' ');
+	_(mongoose.Types.Embedded.prototype).extend({
 
-		this.parent().populate(paths, callback);
-	};
+		populate: function(paths, callback){
+			if(typeof callback === 'function'){
+				var parentPath = this.parentArray()._path;
+				var me = this;
+				paths = paths.split(' ').filter(function(path){
+					return !me.populated(path);
+				}).map(function(path){
+					return parentPath+'.'+path;
+				}).join(' ');
 
-	mongoose.Types.Embedded.prototype.populated = function(path){
-		var parentPath = this.parentArray()._path;
-		return this.parent().populated.apply(this, [parentPath+'.'+path]);
-	};
+				this.parent().populate(paths, callback);
+			}
+			else{
+				return mongoose.Document.prototype.populate.apply(this, arguments);
+			}
+		}
+
+		// populated: function(path){
+		// 	var parentPath = this.parentArray()._path;
+		// 	return this.parent().populated.apply(this, [parentPath+'.'+path]);
+		// }
+
+	});
 
 }

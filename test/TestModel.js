@@ -40,6 +40,10 @@ var TestSchema = new mongoose.Schema({
 			type: String
 		}
 	},
+	arrayAttr: [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
+	}],
 	embeddedTests: [EmbeddedTestSchema]
 });
 

@@ -6,22 +6,24 @@ var async = require('async');
 require('./TestModel');
 require('./UserModel');
 
-var Developer = require('./coverage/instrument/src/index')(mongoose);
-//var Developer = require('../src/index')(mongoose);
+//var Developer = require('./coverage/instrument/src/index')(mongoose);
+var Developer = require('../src/index')(mongoose);
 
 var developer = new Developer({});
 var develop = developer.develop.bind(developer);
 
 
-// var test = mongoose.model('Test')({
-// 	attr1: 'attr1',
-// 	attr2: {
-// 		attr3: 'attr3'
-// 	},
-// 	embeddedTests: [{
-// 		embeddedAttr: 'embeddedAttr'
-// 	}]
-// });
+var test = mongoose.model('Test')({
+	attr1: 'attr1',
+	attr2: {
+		attr3: 'attr3'
+	},
+	embeddedTests: [{
+		embeddedAttr: 'embeddedAttr'
+	}]
+});
+
+debugger
 
 
 describe('Testing the mongoose develop module.', function () {
