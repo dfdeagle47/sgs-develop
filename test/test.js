@@ -3,6 +3,8 @@ global.mongoose = require('mongoose');
 var _ = require('underscore');
 var async = require('async');
 
+require('sgs-mongoose-additions')(mongoose);
+
 require('./TestModel');
 require('./UserModel');
 
@@ -84,6 +86,15 @@ describe('Testing the mongoose develop module.', function () {
 		assertTestLight(doc.virtualInstanceAttr);
 	};
 
+	var assertTestDetailedEmbCust = function(doc){
+		assert(!(doc instanceof mongoose.Document));
+		var keys = _(doc).keys();
+		assert(_(keys).contains('embeddedTests'));
+		doc.embeddedTests.forEach(function(embeddedTest){
+			assertEmbeddedTestCust(embeddedTest);
+		});
+	};
+
 	var assertUserDetailed_TestDetailed = function(doc){
 		assert(!(doc instanceof mongoose.Document));
 		var keys = _(doc).keys();
@@ -98,6 +109,13 @@ describe('Testing the mongoose develop module.', function () {
 		var keys = _(doc).keys();
 		assert.equal(keys.length, 2);
 		assert(_(keys).contains('embeddedAttr'));
+		assert(_(keys).contains('virtualAttr'));
+	};
+
+	var assertEmbeddedTestCust = function(doc){
+		assert(!(doc instanceof mongoose.Document));
+		var keys = _(doc).keys();
+		assert.equal(keys.length, 1);
 		assert(_(keys).contains('virtualAttr'));
 	};
 
@@ -127,7 +145,7 @@ describe('Testing the mongoose develop module.', function () {
 		});
 	});
 
-	it('single document detailed child detailed', function(done){
+	it('single document detailed single child detailed', function(done){
 		mongoose.model('User').findOne({}, function(err, user){
 			var res = {data: user};
 			develop({scope: 'detailed_testdetailed'})({}, res, function(err){
@@ -140,7 +158,20 @@ describe('Testing the mongoose develop module.', function () {
 		});
 	});
 
-	it('documentArray detailed', function(done){
+	it('single document detailed single child parent custom spec', function(done){
+		mongoose.model('Test').findOne({}, function(err, test){
+			var res = {data: test};
+			develop({scope: 'detailed_embcust'})({}, res, function(err){
+				if(err){
+					return done(err);
+				}
+				assertTestDetailedEmbCust(res.data);
+				done();
+			});
+		});
+	});
+
+	it('documentArray * documents detailed', function(done){
 		mongoose.model('Test').findOne({}, function(err, test){
 			if(err){
 				return done(err);

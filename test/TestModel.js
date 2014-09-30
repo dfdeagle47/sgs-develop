@@ -78,6 +78,18 @@ TestSchema.methods.developSchema = function(options, callback){
 			paths: [
 				{path: 'embeddedTests', scope: 'detailed'}
 			]
+		},
+
+		detailed_embcust: {
+			extend: ['detailed'],
+			paths: [
+				{
+					path: 'embeddedTests', 
+					pathsToDevelop: [
+						'virtualAttr'
+					]
+				}
+			]
 		}
 
 	};
