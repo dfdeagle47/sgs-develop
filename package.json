@@ -5,7 +5,7 @@
 	"description": "Sagacify's develop module.",
 	"main": "src/index.js",
 	"scripts": {
-		"test": "grunt ci --verbose"
+		"test": "grunt test"
 	},
 	"dependencies": {
 		"mongoose": "^3.0.0",

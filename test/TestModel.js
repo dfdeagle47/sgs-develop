@@ -59,6 +59,7 @@ TestSchema.methods.developSchema = function(options, callback){
 	var ds = {
 		light: {
 			paths: [
+				'_id',
 				'attr1',
 				'attr2.attr3'
 			]

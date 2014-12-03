@@ -96,6 +96,11 @@ module.exports = function(mongoose){
 					if(err){
 						return callback(err);
 					}
+
+					if (value.constructor.name === 'ObjectID') {
+						value = value.toString();
+					}
+
 					developedObject[path] = value;
 					callback();
 				});

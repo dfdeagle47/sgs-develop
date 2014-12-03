@@ -69,7 +69,7 @@ describe('Testing the mongoose develop module.', function () {
 	var assertTestLight = function(doc){
 		assert(!(doc instanceof mongoose.Document));
 		var keys = _(doc).keys();
-		assert.equal(keys.length, 2);
+		assert.equal(keys.length, 3);
 		assert(_(keys).contains('attr1'));
 		assert(_(keys).contains('attr2.attr3'));
 	};
@@ -77,7 +77,7 @@ describe('Testing the mongoose develop module.', function () {
 	var assertTestDetailed = function(doc){
 		assert(!(doc instanceof mongoose.Document));
 		var keys = _(doc).keys();
-		assert.equal(keys.length, 5);
+		assert.equal(keys.length, 6);
 		assert(_(keys).contains('attr1'));
 		assert(_(keys).contains('attr2.attr3'));
 		assert(_(keys).contains('embeddedTests'));
@@ -204,6 +204,31 @@ describe('Testing the mongoose develop module.', function () {
 			});
 		});
 	});
-		
+
+	it('ObjectId is stringified', function (done) {
+		mongoose.model('Test')
+		.findOne({}, function (e, test) {
+
+			var req = {
+				data: {
+					scope: 'light'
+				}
+			};
+			var res = {
+				data: test
+			};
+
+			develop({})(req, res, function (e) {
+				if (e) {
+					return done(e);
+				}
+
+				console.log(res.data);
+				console.log(res.data._id);
+				assert.strictEqual(typeof res.data._id, 'string');
+				done();
+			});
+		});
+	});
 
 });
