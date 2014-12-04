@@ -223,8 +223,33 @@ describe('Testing the mongoose develop module.', function () {
 					return done(e);
 				}
 
-				console.log(res.data);
-				console.log(res.data._id);
+				assert.strictEqual(typeof res.data._id, 'string');
+				done();
+			});
+		});
+	});
+
+	it('Undefined value', function (done) {
+		mongoose.model('Test')
+		.findOne({}, function (e, test) {
+
+			var req = {
+				data: {
+					scope: 'light'
+				}
+			};
+
+			test.attr1 = undefined;
+
+			var res = {
+				data: test
+			};
+
+			develop({})(req, res, function (e) {
+				if (e) {
+					return done(e);
+				}
+
 				assert.strictEqual(typeof res.data._id, 'string');
 				done();
 			});
