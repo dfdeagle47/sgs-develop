@@ -97,7 +97,7 @@ module.exports = function(mongoose){
 						return callback(err);
 					}
 
-					if (value.constructor.name === 'ObjectID') {
+					if (value && value.constructor && value.constructor.name === 'ObjectID') {
 						value = value.toString();
 					}
 
