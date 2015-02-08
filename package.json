@@ -26,7 +26,7 @@
 		"grunt-jsonlint": "^1.0.4",
 		"grunt-jscs": "^0.6.1",
 		"supertest": "0.13.0",
-		"sgs-mongoose-additions": "git+ssh://git@github.com:Sagacify/sgs-mongoose-additions.git"
+		"sgs-mongoose-additions": "git+ssh://git@github.com:dfdeagle47/sgs-mongoose-additions.git"
 	},
 	"peerDependencies": {
 		"grunt": "^0.4.5"
